@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar E-mails{% endblock %}
+{% block content %}
+<div class="p-3">
+  <h5 class="fw-bold mb-3">Gerenciar E-mails</h5>
+
+  <form method="post" class="input-group mb-3">
+    {% csrf_token %}
+    {{ form.email }}      <!-- já vem com classes/placeholder -->
+    <button class="btn btn-primary"><i class="bi bi-plus"></i></button>
+  </form>
+
+  {% for email in lista %}
+    <div class="border rounded-3 p-2 mb-2 d-flex justify-content-between align-items-center">
+      <span class="small">{{ email.email }}</span>
+      <a href="{% url 'email_delete' email.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+    </div>
+  {% empty %}
+    <p class="text-center text-muted small mb-0">Nenhum e-mail cadastrado.</p>
+  {% endfor %}
+</div>
+{% endblock %}

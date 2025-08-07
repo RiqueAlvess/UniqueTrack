@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Perfil{% endblock %}
+
+{% block content %}
+<div class="p-3">
+  <h5 class="fw-bold mb-3">Perfil</h5>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-2">
+      <label class="form-label small fw-semibold">E-mail SMTP</label>
+      {{ form.smtp_email }}
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label small fw-semibold">Senha</label>
+      {{ form.smtp_password }}
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label small fw-semibold">Servidor SMTP</label>
+      {{ form.smtp_host }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label small fw-semibold">Porta</label>
+      {{ form.smtp_port }}
+    </div>
+
+    <button class="btn btn-outline-secondary w-100 mb-2"
+            formaction="{% url 'testar_smtp' %}" formmethod="post">
+      <i class="bi bi-send-check"></i> Testar Envio de E-mail
+    </button>
+
+    <button class="btn btn-primary w-100">
+      <i class="bi bi-save"></i> Salvar Alterações
+    </button>
+  </form>
+</div>
+{% endblock %}

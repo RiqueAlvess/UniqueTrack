@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
+  <form method="post" class="w-100" style="max-width:360px">
+    {% csrf_token %}
+    <h5 class="fw-bold text-center mb-4">Acessar Sistema</h5>
+    {{ form.non_field_errors }}
+    <div class="mb-3">{{ form.username }}</div>
+    <div class="mb-4">{{ form.password }}</div>
+    <button class="btn btn-primary w-100">Entrar</button>
+  </form>
+</div>
+{% endblock %}

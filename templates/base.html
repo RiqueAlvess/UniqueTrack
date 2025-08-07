@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Sistema de Relatórios{% endblock %}</title>
+
+  <!-- Bootstrap & Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Estilo mínimo para barra inferior -->
+  <style>
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:1030}
+    .bottom-nav a{flex:1 1 0;padding:.5rem 0;font-size:.75rem;color:#6c757d;text-decoration:none}
+    .bottom-nav a.active{color:#0d6efd}
+    .bottom-nav i{font-size:1.25rem;display:block;margin-bottom:.15rem}
+    body{padding-bottom:56px}
+  </style>
+</head>
+<body class="bg-light">
+
+<main class="container-fluid p-0 {% if not user.is_authenticated %}min-vh-100 d-flex flex-column{% endif %}">
+  {% block content %}{% endblock %}
+</main>
+
+{% if user.is_authenticated %}
+<nav class="bottom-nav d-flex bg-white border-top">
+  <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %} text-center">
+    <i class="bi bi-house{% if request.resolver_match.url_name == 'home' %}-fill{% endif %}"></i>Início
+  </a>
+  <a href="{% url 'relatorio_list' %}" class="{% if 'relatorio' in request.resolver_match.url_name %}active{% endif %} text-center">
+    <i class="bi bi-clipboard-data"></i>Relatórios
+  </a>
+  <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} text-center">
+    <i class="bi bi-bar-chart-line"></i>Dashboard
+  </a>
+  <a href="{% url 'emails' %}" class="{% if request.resolver_match.url_name == 'emails' %}active{% endif %} text-center">
+    <i class="bi bi-envelope"></i>E-mails
+  </a>
+  <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %} text-center">
+    <i class="bi bi-person-circle"></i>Perfil
+  </a>
+</nav>
+{% endif %}
+
+<!-- Toasts para mensagens Django -->
+{% if messages %}
+<div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  {% for m in messages %}
+  <div class="toast align-items-center text-bg-{% if m.tags in 'success info' %}success{% elif m.tags == 'error' %}danger{% else %}warning{% endif %} border-0 mb-2" role="alert">
+    <div class="d-flex">
+      <div class="toast-body small">{{ m }}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<script>
+  document.querySelectorAll('.toast').forEach(t=>new bootstrap.Toast(t,{delay:4000}).show());
+</script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

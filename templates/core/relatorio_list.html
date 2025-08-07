@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Relatórios{% endblock %}
+{% block content %}
+<div class="p-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">Histórico</h5>
+    <a href="{% url 'relatorio_create' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Novo</a>
+  </div>
+
+  {% for rel in relatorios %}
+  <div class="border rounded-3 p-3 mb-2">
+    <div class="d-flex justify-content-between fw-semibold">
+      <span>{{ rel.data }}</span>
+      {% if rel.status_envio == "enviado" %}
+        <span class="text-success"><i class="bi bi-check-circle"></i> Enviado</span>
+      {% else %}
+        <span class="text-danger"><i class="bi bi-x-circle"></i> Não enviado</span>
+      {% endif %}
+    </div>
+    <div class="small text-muted">
+      Limpos: {{ rel.total_cleaned }} &nbsp;|&nbsp; Drops: {{ rel.forecasted_drops }}
+    </div>
+    {% if rel.status_envio != "enviado" %}
+      <a href="{% url 'relatorio_send_email' rel.pk %}" class="btn btn-primary btn-sm w-100 mt-2">
+        <i class="bi bi-send"></i> Enviar
+      </a>
+    {% endif %}
+  </div>
+  {% empty %}
+    <p class="text-center text-muted">Nenhum relatório ainda.</p>
+  {% endfor %}
+</div>
+{% endblock %}

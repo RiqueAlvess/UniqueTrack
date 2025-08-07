@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="p-3">
+  <h5 class="fw-bold mb-3">Dashboard</h5>
+
+  <div class="row g-2 text-center mb-3">
+    <div class="col-6"><div class="border rounded-3 p-3"><span class="h4">{{ cleaned }}</span><br><small>Carros Limpos</small></div></div>
+    <div class="col-6"><div class="border rounded-3 p-3"><span class="h4">{{ drops }}</span><br><small>Previsão Drops</small></div></div>
+    <div class="col-6"><div class="border rounded-3 p-3"><span class="h4">{{ enviados }}</span><br><small>Relatórios Enviados</small></div></div>
+    <div class="col-6"><div class="border rounded-3 p-3"><span class="h4">{{ total }}</span><br><small>Total de Relatórios</small></div></div>
+  </div>
+
+  <!-- espaço reservado para gráficos futuros -->
+</div>
+{% endblock %}
