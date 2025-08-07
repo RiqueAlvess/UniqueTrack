@@ -26,4 +26,6 @@ urlpatterns = [
             template_name='login.html',
             authentication_form=LoginForm),             name='login'),
     path('logout/', auth_views.LogoutView.as_view(),    name='logout'),
+    path('relatorios/<int:pk>/copiar/', views.relatorio_copy, name='relatorio_copy'),
 ]
+

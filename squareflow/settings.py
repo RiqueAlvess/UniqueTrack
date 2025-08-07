@@ -1,39 +1,31 @@
 import os
 from pathlib import Path
+import dj_database_url
 
-# ──────────────────────────────────────────────────────────────
-# CAMINHOS BÁSICOS
-# ──────────────────────────────────────────────────────────────
+# ─── Caminhos básicos ─────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ──────────────────────────────────────────────────────────────
-# APPS INSTALADOS
-# ──────────────────────────────────────────────────────────────
+# ─── Configurações de segurança (dev) ─────────────────────────
+SECRET_KEY   = "as155sa4dsa541das15sad1as5"
+DEBUG        = True
+ALLOWED_HOSTS = ["*"]  # permitir tudo em dev
+
+# ─── Apps ─────────────────────────────────────────────────────
 INSTALLED_APPS = [
-    # Django core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Terceiros
+    # terceiros
     "cloudinary",
     "cloudinary_storage",
-
-    # Seu app
+    # seu app
     "core",
 ]
 
-# ──────────────────────────────────────────────────────────────
-# USUÁRIOS / AUTH
-# ──────────────────────────────────────────────────────────────
-AUTH_USER_MODEL = "auth.User"  # caso mude no futuro
-
-# ──────────────────────────────────────────────────────────────
-# MIDDLEWARE
-# ──────────────────────────────────────────────────────────────
+# ─── Middleware ───────────────────────────────────────────────
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -44,15 +36,20 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# ──────────────────────────────────────────────────────────────
-# URL / WSGI
-# ──────────────────────────────────────────────────────────────
 ROOT_URLCONF = "squareflow.urls"
 WSGI_APPLICATION = "squareflow.wsgi.application"
 
-# ──────────────────────────────────────────────────────────────
-# TEMPLATES (Bootstrap toasts dependem do context-processor messages)
-# ──────────────────────────────────────────────────────────────
+# ─── Banco de dados (Postgres na Render) ──────────────────────
+DATABASES = {
+    "default": dj_database_url.parse(
+        "postgresql://uniquedb_hwty_user:nO90a6PQSa7phmDwGxhmKMksEx5bcTw4"
+        "@dpg-d2a5s1ogjchc73e9gi20-a.oregon-postgres.render.com/uniquedb_hwty",
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
+
+# ─── Templates ────────────────────────────────────────────────
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -69,43 +66,26 @@ TEMPLATES = [
     },
 ]
 
-# ──────────────────────────────────────────────────────────────
-# DATABASE – SQLite para dev; troque em produção
-# ──────────────────────────────────────────────────────────────
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# ─── Arquivos estáticos / mídia ───────────────────────────────
+STATIC_URL   = "/static/"
+STATIC_ROOT  = BASE_DIR / "staticfiles"
+MEDIA_URL    = "/media/"
+MEDIA_ROOT   = BASE_DIR / "media"
 
-# ──────────────────────────────────────────────────────────────
-# STATIC / MEDIA
-# ──────────────────────────────────────────────────────────────
-STATIC_URL = "/static/"
-MEDIA_URL = "/media/"
-
-STATICFILES_DIRS = [BASE_DIR / "static"]
-MEDIA_ROOT = BASE_DIR / "media"
-
-# Cloudinary para imagens de relatórios
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": "SUA_CLOUD",
-    "API_KEY": "SUA_KEY",
+    "API_KEY":    "SUA_KEY",
     "API_SECRET": "SUA_SECRET",
 }
 
-# ──────────────────────────────────────────────────────────────
-# LOGIN / LOGOUT
-# ──────────────────────────────────────────────────────────────
-LOGIN_URL = "/login/"
+# ─── Auth redirects ───────────────────────────────────────────
+LOGIN_URL          = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
-# ──────────────────────────────────────────────────────────────
-# DIVERSOS
-# ──────────────────────────────────────────────────────────────
-ALLOWED_HOSTS = ["*"]   # ajuste em produção
-DEBUG = True            # False em produção
-SECRET_KEY = "as155sa4dsa541das15sad1as5"  # gere um novo em produção
+# ─── Outras opções ────────────────────────────────────────────
+# Armazena mensagens Django na sessão (evita problemas de cookie cheio)
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+#RHD6TWZFAJ9V7QMHGSM6R4BT

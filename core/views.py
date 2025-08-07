@@ -95,29 +95,33 @@ def relatorio_create(request):
 
 @login_required
 def relatorio_send_email(request, pk):
+    print("===> Entrou em relatorio_send_email")          # DEBUG
     rel = get_object_or_404(Relatorio, pk=pk, user=request.user)
-    cfg = get_object_or_404(UserSMTPConfig, user=request.user)
-    destinatarios = DestinatarioEmail.objects.filter(user=request.user).values_list('email', flat=True)
+
+    # 1) SMTP
+    try:
+        cfg = UserSMTPConfig.objects.get(user=request.user)
+    except UserSMTPConfig.DoesNotExist:
+        print("!!! Sem SMTP configurado")                 # DEBUG
+        messages.error(request, "Configure o SMTP no Perfil.")
+        return redirect('perfil')
+
+    # 2) Destinatários
+    destinatarios = list(DestinatarioEmail.objects
+                         .filter(user=request.user)
+                         .values_list('email', flat=True))
     if not destinatarios:
+        print("!!! Sem destinatários")                    # DEBUG
         messages.error(request, "Cadastre destinatários primeiro.")
         return redirect('emails')
 
-    # Corpo
-    subject = f"Relatório de Carros - {rel.data}"
-    body = (
-        f"Ready Line:      {rel.ready_line}\n"
-        f"VIP Line:        {rel.vip_line}\n"
-        f"Overflow Kiosk:  {rel.overflow_kiosk}\n"
-        f"Overflow 2:      {rel.overflow_2}\n"
-        f"Black Top:       {rel.black_top}\n"
-        f"Return Line:     {rel.return_line}\n"
-        f"Mecânico:        {rel.mecanico}\n"
-        f"Gas Run:         {rel.gas_run}\n"
-        f"Total Cleaned:   {rel.total_cleaned}\n"
-        f"Forecasted Drops:{rel.forecasted_drops}\n"
-    )
+    # 3) Se chegou aqui vai tentar enviar
+    print(">>> Tentando enviar para", destinatarios)      # DEBUG
 
-    email = EmailMessage(subject, body, cfg.smtp_email, list(destinatarios))
+    subject = f"Relatório de Carros - {rel.data}"
+    body = f"...dados do relatório..."
+
+    email = EmailMessage(subject, body, cfg.smtp_email, destinatarios)
     for img in rel.imagens.all():
         email.attach_file(img.imagem.path)
 
@@ -127,10 +131,10 @@ def relatorio_send_email(request, pk):
         rel.status_envio = 'enviado'
         rel.save()
         messages.success(request, "Enviado com sucesso!")
-    except smtplib.SMTPAuthenticationError:
-        messages.error(request, "Falha de autenticação: verifique usuário/senha.")
+        print("+++ Enviado OK")                           # DEBUG
     except Exception as e:
         messages.error(request, f"Erro SMTP: {e}")
+        print("XXX Falha SMTP:", e)                       # DEBUG
 
     return redirect('relatorio_list')
 
@@ -182,3 +186,14 @@ def testar_smtp(request):
     except Exception as e:
         messages.error(request, f"Erro SMTP: {e}")
     return redirect('perfil')
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+...
+@require_GET
+@login_required
+def relatorio_copy(request, pk):
+    rel = get_object_or_404(Relatorio, pk=pk, user=request.user)
+    texto = rel.clipboard_text()          # método que já criamos no model
+    return JsonResponse({"texto": texto})

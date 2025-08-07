@@ -31,6 +31,22 @@ class Relatorio(models.Model):
     status_envio = models.CharField(max_length=16, choices=STATUS_CHOICES, default='nao_enviado')
     imagens = models.ManyToManyField(RelatorioImagem, blank=True)
 
+    def clipboard_text(self) -> str:
+        """Texto pronto para copiar/colar no e-mail ou chat."""
+        return (
+            f"Below the cars count of {self.data.strftime('%d/%m/%y')}\n\n"
+            f"ready line =  {self.ready_line}\n\n"
+            f"VIP line = {self.vip_line}\n\n"
+            f"Overflow Kiosk = {self.overflow_kiosk}\n"
+            f"Overflow 2 = {self.overflow_2}\n\n"
+            f"Black top = {self.black_top}\n\n"
+            f"return = {self.return_line}\n"
+            f"Mecânico = {self.mecanico}\n"
+            f"gas run = {self.gas_run}\n\n"
+            f"Total count of cleaned cars: {self.total_cleaned}\n\n"
+            f"Forecasted drops: {self.forecasted_drops}\n"
+        )
+
 class UserSMTPConfig(models.Model):
     user          = models.OneToOneField(User, on_delete=models.CASCADE)
     smtp_email    = models.EmailField()
