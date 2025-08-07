@@ -8,7 +8,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ─── Configurações de segurança (dev) ─────────────────────────
 SECRET_KEY   = "as155sa4dsa541das15sad1as5"
 DEBUG        = True
-ALLOWED_HOSTS = ["*"]  # permitir tudo em dev
+ALLOWED_HOSTS = [
+    "uniquetrack.onrender.com",
+    "www.uniquetrack.onrender.com",   # se tiver
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://uniquetrack.onrender.com",
+    "https://www.uniquetrack.onrender.com",
+    # ou genérico, se você tiver mais projetos
+    "https://*.onrender.com",
+]
 
 # ─── Apps ─────────────────────────────────────────────────────
 INSTALLED_APPS = [
