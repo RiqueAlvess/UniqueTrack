@@ -15,20 +15,11 @@ from .forms import (
     DestinatarioEmailForm,
     UserSMTPConfigForm,
 )
-import smtplib, ssl
+from .utils import smtp_test, send_email_via_api
 
 # ------------------------------------------------------------------
 # Utilitário simples para testar conexão SMTP (TLS porta 587)
 # ------------------------------------------------------------------
-def smtp_test(cfg: UserSMTPConfig):
-    context = ssl.create_default_context()
-    server = smtplib.SMTP(cfg.smtp_host, cfg.smtp_port, timeout=10)
-    try:
-        server.starttls(context=context)
-        server.login(cfg.smtp_email, cfg.smtp_password)
-    finally:
-        server.quit()
-
 def build_backend(cfg: UserSMTPConfig):
     """EmailBackend com TLS (porta 587)."""
     return EmailBackend(
@@ -98,12 +89,12 @@ def relatorio_send_email(request, pk):
     print("===> Entrou em relatorio_send_email")          # DEBUG
     rel = get_object_or_404(Relatorio, pk=pk, user=request.user)
 
-    # 1) SMTP
+    # 1) Configuração (usa o mesmo UserSMTPConfig)
     try:
         cfg = UserSMTPConfig.objects.get(user=request.user)
     except UserSMTPConfig.DoesNotExist:
-        print("!!! Sem SMTP configurado")                 # DEBUG
-        messages.error(request, "Configure o SMTP no Perfil.")
+        print("!!! Sem configuração")                 # DEBUG
+        messages.error(request, "Configure o e-mail no Perfil.")
         return redirect('perfil')
 
     # 2) Destinatários
@@ -115,26 +106,24 @@ def relatorio_send_email(request, pk):
         messages.error(request, "Cadastre destinatários primeiro.")
         return redirect('emails')
 
-    # 3) Se chegou aqui vai tentar enviar
+    # 3) Preparar conteúdo
+    subject = f"Relatório de Carros - {rel.data}"
+    body = rel.clipboard_text()
+
     print(">>> Tentando enviar para", destinatarios)      # DEBUG
 
-    subject = f"Relatório de Carros - {rel.data}"
-    body = f"...dados do relatório..."
-
-    email = EmailMessage(subject, body, cfg.smtp_email, destinatarios)
-    for img in rel.imagens.all():
-        email.attach_file(img.imagem.path)
-
     try:
-        with build_backend(cfg) as con:
-            con.send_messages([email])
+        # MUDANÇA AQUI: usar API ao invés do SMTP tradicional
+        response = send_email_via_api(cfg, destinatarios, subject, body)
+        
         rel.status_envio = 'enviado'
         rel.save()
-        messages.success(request, "Enviado com sucesso!")
-        print("+++ Enviado OK")                           # DEBUG
+        messages.success(request, "Enviado com sucesso via API!")
+        print("+++ Enviado OK via API:", response)         # DEBUG
+        
     except Exception as e:
-        messages.error(request, f"Erro SMTP: {e}")
-        print("XXX Falha SMTP:", e)                       # DEBUG
+        messages.error(request, f"Erro no envio via API: {e}")
+        print("XXX Falha no envio:", e)                    # DEBUG
 
     return redirect('relatorio_list')
 
@@ -181,10 +170,11 @@ def perfil(request):
 def testar_smtp(request):
     cfg = get_object_or_404(UserSMTPConfig, user=request.user)
     try:
-        smtp_test(cfg)
-        messages.success(request, "Conexão SMTP OK!")
+        # MUDANÇA AQUI: testar API ao invés de SMTP
+        response = smtp_test(cfg)
+        messages.success(request, f"Conexão com API OK! Resposta: {response}")
     except Exception as e:
-        messages.error(request, f"Erro SMTP: {e}")
+        messages.error(request, f"Erro na API: {e}")
     return redirect('perfil')
 
 
