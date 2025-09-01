@@ -5,10 +5,16 @@ def smtp_test(cfg):
     """Testa a conexão com a API de e-mail"""
     api_url = 'https://b17e248dbc8e.ngrok-free.app/send-email'
     
+    # GARANTIR que a senha do banco vai direto para API
+    senha_do_banco = cfg.smtp_password or ""  # se vier None, vira string vazia
+    
+    if not senha_do_banco:
+        raise Exception("Senha não configurada. Configure a senha no Perfil primeiro.")
+    
     payload = {
-        "email": str(cfg.smtp_email),
-        "password": str(cfg.smtp_password),
-        "to": [str(cfg.smtp_email)],
+        "email": cfg.smtp_email,              # direto do banco
+        "password": senha_do_banco,           # direto do banco, sem conversão
+        "to": [cfg.smtp_email],               # lista com o próprio email
         "subject": "Teste de Configuração - Sistema de Relatórios",
         "body": "Este é um e-mail de teste para verificar se a API está funcionando corretamente.",
         "debug": True,
@@ -16,8 +22,9 @@ def smtp_test(cfg):
     }
     
     print(f"DEBUG - Teste API:")
-    print(f"  Email: {payload['email']}")
-    print(f"  Password length: {len(payload['password'])}")
+    print(f"  Email do banco: {cfg.smtp_email}")
+    print(f"  Senha do banco tem: {len(senha_do_banco)} caracteres")
+    print(f"  Senha é válida: {bool(senha_do_banco)}")
     
     headers = {'Content-Type': 'application/json'}
     
@@ -65,21 +72,27 @@ def send_email_via_api(cfg, to_emails, subject, body):
     """Envia e-mail através da API"""
     api_url = 'https://b17e248dbc8e.ngrok-free.app/send-email'
     
+    # GARANTIR que a senha do banco vai direto para API
+    senha_do_banco = cfg.smtp_password or ""  # se vier None, vira string vazia
+    
+    if not senha_do_banco:
+        raise Exception("Senha não configurada. Configure a senha no Perfil primeiro.")
+    
     payload = {
-        "email": str(cfg.smtp_email),
-        "password": str(cfg.smtp_password),
-        "to": [str(email) for email in to_emails],
-        "subject": str(subject),
-        "body": str(body),
+        "email": cfg.smtp_email,              # direto do banco
+        "password": senha_do_banco,           # direto do banco, sem conversão
+        "to": to_emails,                      # lista já vem pronta
+        "subject": subject,                   # direto do parâmetro
+        "body": body,                         # direto do parâmetro
         "debug": True,
         "headless": False
     }
     
     print(f"DEBUG - Envio via API:")
-    print(f"  Email: {payload['email']}")
-    print(f"  Password length: {len(payload['password'])}")
-    print(f"  Para: {payload['to']}")
-    print(f"  Assunto: {payload['subject'][:50]}...")
+    print(f"  Email do banco: {cfg.smtp_email}")
+    print(f"  Senha do banco tem: {len(senha_do_banco)} caracteres")
+    print(f"  Para: {to_emails}")
+    print(f"  Assunto: {subject[:50]}...")
     
     headers = {'Content-Type': 'application/json'}
     
